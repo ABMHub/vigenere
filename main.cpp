@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -30,6 +32,50 @@ pair<string, vector<bool>> lowerCase(string str) {
   }
   pair<string, vector<bool>> ans = {ret, upper};
   return ans;
+}
+
+bool special_char (char c) {
+  vector<char> char_list = {'.', ' ', ';', ',', '-', '\'', '"', '!', ':', '\r', '\n'};
+  for (int i = 0; i < char_list.size(); i++) {
+    if (c == char_list[i]) return true;
+  }
+  return false;
+}
+
+pair <string, vector<pair<char, int>>> filter(string str) {
+  string ret;
+  vector<pair<char, int>> special_char_map;
+  for (int i = 0; i < str.size(); i++) {
+    if (special_char(str[i])) {
+      pair<char, int> p = {str[i], i};
+      special_char_map.push_back(p);
+    }
+    else {
+      ret.push_back(str[i]);
+    }
+  }
+  return {ret, special_char_map};
+}
+
+string unfilter (string str, vector<pair<char, int>> pci) {
+  string ret;
+  bool flag = false;
+  int i = 0, j = 0, k=0;
+  while (j != pci.size()) {
+    if (pci[j].second == k) {
+      ret.push_back(pci[j].first);
+      j++;
+    }
+    else {
+      ret.push_back(str[i]);
+      i++;
+    }
+    k++;
+  }
+  while (i != str.size()) {
+    ret.push_back(str[i]);
+  }
+  return ret;
 }
 
 string code_decode (string wrd, string key, bool dcd) {
@@ -64,14 +110,29 @@ string decode(string wrd, string key) {
 }
 
 int main () {
-  string wrd, key;
-  cout << "Palavra a ser cifrada: ";
-  cin >> wrd;
-  cout << "Chave de cifra: ";
-  cin >> key;
-  string cifrada = code(wrd, key);
-  cout << "Cifrada: " << cifrada << endl;
-  string decifrada = decode(cifrada, key);
-  cout << "Decifrada: " << decifrada << endl;
-  return 0;
+  ifstream f("cifras/desafio1.txt");
+  stringstream buffer;
+  buffer << f.rdbuf();
+  auto s = buffer.str();
+  auto r = filter(s);
+  auto s2 = r.first;
+  cout << s2 << endl;
+  cout << "-----\n";
+  auto s3 = unfilter(r.first, r.second);
+  cout << "-----\n";
+  cout << s3;
+  return 0;  
 }
+
+// int main () {
+//   string wrd, key;
+//   cout << "Palavra a ser cifrada: ";
+//   cin >> wrd;
+//   cout << "Chave de cifra: ";
+//   cin >> key;
+//   string cifrada = code(wrd, key);
+//   cout << "Cifrada: " << cifrada << endl;
+//   string decifrada = decode(cifrada, key);
+//   cout << "Decifrada: " << decifrada << endl;
+//   return 0;
+// }
