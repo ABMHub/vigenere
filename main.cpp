@@ -8,64 +8,12 @@
 using namespace std;
 
 vector<double> pt_probs = {
-  14.63,
-  1.04,
-  3.88,
-  4.99,
-  12.57,
-  1.02,
-  1.30,
-  1.28,
-  6.18,
-  0.40,
-  0.02,
-  2.78,
-  4.74,
-  5.05,
-  10.73,
-  2.52,
-  1.20,
-  6.53,
-  7.81,
-  4.34,
-  4.63,
-  1.67,
-  0.10,
-  0.21,
-  0.01,
-  0.47
+  14.63, 1.04, 3.88, 4.99, 12.57, 1.02, 1.30, 1.28, 6.18, 0.40, 0.02, 2.78, 4.74, 5.05, 10.73, 2.52, 1.20, 6.53, 7.81, 4.34, 4.63, 1.67, 0.10, 0.21, 0.01, 0.47
 };
 
 vector<double> en_probs = {
-  8.167,
-  1.492,
-  2.782,
-  4.253,
-  12.702,
-  2.228,
-  2.015,
-  6.094,
-  6.966,
-  0.153,
-  0.722,
-  4.025,
-  2.406,
-  6.749,
-  7.507,
-  1.929,
-  0.095,
-  5.987,
-  6.327,
-  9.056,
-  2.758,
-  0.978,
-  2.360,
-  0.150,
-  1.974,
-  0.074
+  8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.966, 0.153, 0.722, 4.025, 2.406, 6.749, 7.507, 1.929, 0.095, 5.987, 6.327, 9.056, 2.758, 0.978, 2.360, 0.150, 1.974, 0.074
 };
-
-vector<vector<double>> languages = {pt_probs, en_probs};
 
 int mod (int num, int base) {
   int ret = num % base;
@@ -207,9 +155,7 @@ char shift_probs(vector<double> alph, vector<double> language) {
       ret.second = diff;
       ret.first = i;
     }
-    cout << (char) (i + 97) << " " << diff << endl;
   }
-  cout << endl;
   return (char) (ret.first + 97);
 }
 
@@ -235,47 +181,48 @@ pair<string, string> letter_frequency(string wrd, int key_s) {
   return {key_pt, key_en};
 }
 
-pair<string, string> break_cipher(string wrd) {
-  auto trigram_distances = trigram(wrd);
-  key_size(trigram_distances);
-  int key_s;
-  cout << "Escolha um valor para a chave: "; 
-  cin >> key_s;
-  auto keys = letter_frequency(wrd, key_s);
-  cout << keys.first << " - " << keys.second << endl;
-  return {decode(wrd, keys.first), decode(wrd, keys.second)};
-}
-
-int main () {
-  ifstream f("cifras/desafio2.txt");
+string read_file(string file_path) {
+  ifstream f(file_path);
   stringstream buffer;
   buffer << f.rdbuf();
   auto s = buffer.str();
-  auto r = filter(s);
-  auto s2 = r.first;
-  // cout << s2;
-  cout << unfilter(decode(s2, "temporal"), r.second);
-  // auto res = break_cipher(s2);
-  // cout << unfilter(res.first, r.second) << endl << endl << unfilter(res.second, r.second) << endl;
-
-  // cout << s2 << endl;
-  // cout << "-----\n";
-  // auto s3 = unfilter(r.first, r.second);
-  // cout << "-----\n";
-  // cout << s3;
-  return 0;  
+  return s;
 }
 
-// int main () {
-//   string wrd, key;
-//   cout << "Palavra a ser cifrada: ";
-//   cin >> wrd;
-//   cout << "Chave de cifra: ";
-//   cin >> key;
-//   string cifrada = code(wrd, key);
-//   cout << "Cifrada: " << cifrada << endl;
-//   string decifrada = decode(cifrada, key);
-//   cout << "Decifrada: " << decifrada << endl;
+pair<string, string> break_cipher(string file_path) {
+  string wrd = read_file(file_path);
+  auto ret_filter = filter(wrd);
+  wrd = ret_filter.first;
 
-//   return 0;
-// }
+  auto trigram_distances = trigram(wrd);
+  key_size(trigram_distances);
+
+  int key_s;
+  cout << "Escolha um valor para a chave: "; 
+  cin >> key_s;
+
+  auto keys = letter_frequency(wrd, key_s);
+  cout << "Chave em portugues encontrada: " << keys.first << endl << "Chave em ingles encontrada: " << keys.second << endl;
+
+  pair<string, string> ret = {decode(wrd, keys.first), decode(wrd, keys.second)};
+  ret = {unfilter(ret.first, ret_filter.second), unfilter(ret.second, ret_filter.second)};
+
+  return ret;
+}
+
+int main () {
+  string wrd, key;
+  cout << "Palavra a ser cifrada: ";
+  cin >> wrd;
+  cout << "Chave de cifra: ";
+  cin >> key;
+  string cifrada = code(wrd, key);
+  cout << "Cifrada: " << cifrada << endl;
+  string decifrada = decode(cifrada, key);
+  cout << "Decifrada: " << decifrada << endl;
+
+  auto res = break_cipher("cifras/desafio1.txt");
+  cout << res.first << endl << endl << res.second;
+
+  return 0;
+}
