@@ -2,8 +2,70 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <set>
 
 using namespace std;
+
+vector<double> pt_probs = {
+  14.63,
+  1.04,
+  3.88,
+  4.99,
+  12.57,
+  1.02,
+  1.30,
+  1.28,
+  6.18,
+  0.40,
+  0.02,
+  2.78,
+  4.74,
+  5.05,
+  10.73,
+  2.52,
+  1.20,
+  6.53,
+  7.81,
+  4.34,
+  4.63,
+  1.67,
+  0.10,
+  0.21,
+  0.01,
+  0.47
+};
+
+vector<double> en_probs = {
+  8.167,
+  1.492,
+  2.782,
+  4.253,
+  12.702,
+  2.228,
+  2.015,
+  6.094,
+  6.966,
+  0.153,
+  0.722,
+  4.025,
+  2.406,
+  6.749,
+  7.507,
+  1.929,
+  0.095,
+  5.987,
+  6.327,
+  9.056,
+  2.758,
+  0.978,
+  2.360,
+  0.150,
+  1.974,
+  0.074
+};
+
+vector<vector<double>> languages = {pt_probs, en_probs};
 
 int mod (int num, int base) {
   int ret = num % base;
@@ -109,18 +171,110 @@ string decode(string wrd, string key) {
   return code_decode(wrd, key, 1);
 }
 
+vector<int> trigram (string wrd) {
+  vector<int> ret;
+  for (int i = 0; i < wrd.size()-3; i++) {
+    string tri = {wrd[i], wrd[i+1], wrd[i+2]};
+    auto pos = wrd.find(tri, i+1);
+    if (pos != string::npos) {
+      // cout << tri << " " << i << " - " << pos << endl;
+      ret.push_back(pos - i);
+    }
+  }
+  return ret;
+}
+
+int key_size (vector<int> trigram_distances) {
+  multiset<int> ms;
+  for (int i = 0; i < trigram_distances.size(); i++) {
+    for (int j = 2; j <= 20; j++) {
+      if (trigram_distances[i]%j == 0) ms.insert(j);
+    }
+  }
+  for (int j = 2; j <= 20; j++) {
+    cout << j << " - " << ms.count(j) << endl;
+  }
+  return 0;
+}
+
+char shift_probs(vector<double> alph, vector<double> language) {
+  pair<int, double> ret = {0, 10e3};
+  for (int i = 0; i < 26; i++) {
+    double diff = 0;
+    for (int j = 0; j < 26; j++) {
+      diff += abs(alph[mod(i + j, 26)] - language[j]);
+      // cout << alph[mod(i + j, 26)] << " - " << language[j] << endl;
+    }
+    // cout << diff << " ";
+    if (diff < ret.second) {
+      ret.second = diff;
+      ret.first = i;
+    }
+    cout << (char) (i + 97) << " " << diff << endl;
+  }
+  cout << endl;
+  // cout << (char) (ret.first + 97) << endl;
+  return (char) (ret.first + 97);
+}
+
+pair<string, string> letter_frequency(string wrd, int key_s) {
+  string key_pt;
+  string key_en;
+  for (int i = 0; i < key_s; i++) {
+    multiset<char> ms;
+    for (int pos = i; pos < wrd.size(); pos += key_s) {
+      // cout << pos << " ";
+      ms.insert(wrd[pos]);
+    }
+    // cout << endl;
+    vector<double> alph(26);
+    int ltts_size = ms.size();
+      // cout << "PROBS: ";
+      double a = 0;
+    for (int j = 0; j < 26; j++) {
+      char c = j + 97;
+      alph[j] = ((double) (((double)ms.count(c))/((double)ltts_size)))*100;
+      // cout << alph[j] << " ";
+      a += alph [j];
+    }
+    // cout << a << endl;
+    key_pt.push_back(shift_probs(alph, pt_probs));
+    key_en.push_back(shift_probs(alph, en_probs));
+  }
+  return {key_pt, key_en};
+}
+
+pair<string, string> break_cipher(string wrd) {
+  // // todo calcular distancia entre trigramas
+  auto trigram_distances = trigram(wrd);
+  // todo calcular os fatores de cada trigama para encontrar o tamanho da chave
+  key_size(trigram_distances);
+  // todo distribuicao do alfabeto para encontrar chave
+  int key_s;
+  cout << "Escolha um valor para a chave: "; 
+  cin >> key_s;
+  auto keys = letter_frequency(wrd, key_s);
+  cout << keys.first << " - " << keys.second << endl;
+  return {decode(wrd, keys.first), decode(wrd, keys.second)};
+}
+
 int main () {
-  ifstream f("cifras/desafio1.txt");
+  ifstream f("cifras/desafio2.txt");
   stringstream buffer;
   buffer << f.rdbuf();
   auto s = buffer.str();
   auto r = filter(s);
   auto s2 = r.first;
-  cout << s2 << endl;
-  cout << "-----\n";
-  auto s3 = unfilter(r.first, r.second);
-  cout << "-----\n";
-  cout << s3;
+  // cout << s2;
+  cout << unfilter(decode(s2, "temporal"), r.second);
+  // auto res = break_cipher(s2);
+  // cout << unfilter(res.first, r.second) << endl << endl << unfilter(res.second, r.second) << endl;
+
+  // cout << s2 << endl;
+  // cout << "-----\n";
+  // auto s3 = unfilter(r.first, r.second);
+  // cout << "-----\n";
+  // cout << s3;
   return 0;  
 }
 
@@ -134,5 +288,6 @@ int main () {
 //   cout << "Cifrada: " << cifrada << endl;
 //   string decifrada = decode(cifrada, key);
 //   cout << "Decifrada: " << decifrada << endl;
+
 //   return 0;
 // }
