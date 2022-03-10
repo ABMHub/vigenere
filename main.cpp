@@ -198,7 +198,8 @@ void write_results(string str, string file_name) {
 
 pair<string, string> break_cipher(string file_path) {
   string wrd = read_file(file_path);
-  auto ret_filter = filter(wrd);
+  auto ret_lower = lowerCase(wrd);
+  auto ret_filter = filter(ret_lower.first);
   wrd = ret_filter.first;
 
   auto trigram_distances = trigram(wrd);
@@ -213,21 +214,35 @@ pair<string, string> break_cipher(string file_path) {
 
   pair<string, string> ret = {decode(wrd, keys.first), decode(wrd, keys.second)};
   ret = {unfilter(ret.first, ret_filter.second), unfilter(ret.second, ret_filter.second)};
+  ret = {upperCase(ret.first, ret_lower.second), upperCase(ret.second, ret_lower.second)};
 
   return ret;
 }
 
 int main () {
-  string wrd, key;
+  // string wrd, key;
 
-  auto res = break_cipher("cifras/desafio1.txt");
+  // string a = read_file("cifras/debug.txt");
+  // auto b = lowerCase(a);
+  // auto c = filter(b.first);
+
+  // auto d = code(c.first, "lucaslindo");
+
+  // auto e = unfilter(d, c.second);
+  // auto f = upperCase(e, b.second);
+  // cout << f;
+
+  auto res = break_cipher("cifras/debug3.txt");
   cout << res.first << endl << endl << res.second;
 
-  auto res2 = break_cipher("cifras/desafio2.txt");
-  cout << res2.first << endl << endl << res2.second;
+  // auto res = break_cipher("cifras/desafio1.txt");
+  // cout << res.first << endl << endl << res.second;
 
-  write_results(res.first, "desafio1.txt");
-  write_results(res2.first, "desafio2.txt");
+  // auto res2 = break_cipher("cifras/desafio2.txt");
+  // cout << res2.first << endl << endl << res2.second;
+
+  // write_results(res.first, "desafio1.txt");
+  // write_results(res2.first, "desafio2.txt");
 
   return 0;
 }
