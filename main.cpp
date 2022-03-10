@@ -177,7 +177,6 @@ vector<int> trigram (string wrd) {
     string tri = {wrd[i], wrd[i+1], wrd[i+2]};
     auto pos = wrd.find(tri, i+1);
     if (pos != string::npos) {
-      // cout << tri << " " << i << " - " << pos << endl;
       ret.push_back(pos - i);
     }
   }
@@ -203,9 +202,7 @@ char shift_probs(vector<double> alph, vector<double> language) {
     double diff = 0;
     for (int j = 0; j < 26; j++) {
       diff += abs(alph[mod(i + j, 26)] - language[j]);
-      // cout << alph[mod(i + j, 26)] << " - " << language[j] << endl;
     }
-    // cout << diff << " ";
     if (diff < ret.second) {
       ret.second = diff;
       ret.first = i;
@@ -213,7 +210,6 @@ char shift_probs(vector<double> alph, vector<double> language) {
     cout << (char) (i + 97) << " " << diff << endl;
   }
   cout << endl;
-  // cout << (char) (ret.first + 97) << endl;
   return (char) (ret.first + 97);
 }
 
@@ -223,21 +219,16 @@ pair<string, string> letter_frequency(string wrd, int key_s) {
   for (int i = 0; i < key_s; i++) {
     multiset<char> ms;
     for (int pos = i; pos < wrd.size(); pos += key_s) {
-      // cout << pos << " ";
       ms.insert(wrd[pos]);
     }
-    // cout << endl;
     vector<double> alph(26);
     int ltts_size = ms.size();
-      // cout << "PROBS: ";
       double a = 0;
     for (int j = 0; j < 26; j++) {
       char c = j + 97;
       alph[j] = ((double) (((double)ms.count(c))/((double)ltts_size)))*100;
-      // cout << alph[j] << " ";
       a += alph [j];
     }
-    // cout << a << endl;
     key_pt.push_back(shift_probs(alph, pt_probs));
     key_en.push_back(shift_probs(alph, en_probs));
   }
@@ -245,11 +236,8 @@ pair<string, string> letter_frequency(string wrd, int key_s) {
 }
 
 pair<string, string> break_cipher(string wrd) {
-  // // todo calcular distancia entre trigramas
   auto trigram_distances = trigram(wrd);
-  // todo calcular os fatores de cada trigama para encontrar o tamanho da chave
   key_size(trigram_distances);
-  // todo distribuicao do alfabeto para encontrar chave
   int key_s;
   cout << "Escolha um valor para a chave: "; 
   cin >> key_s;
