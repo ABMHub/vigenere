@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <set>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -45,10 +46,7 @@ pair<string, vector<bool>> lowerCase(string str) {
 }
 
 bool special_char (char c) {
-  vector<char> char_list = {'.', ' ', ';', ',', '-', '\'', '"', '!', ':', '\r', '\n'};
-  for (int i = 0; i < char_list.size(); i++) {
-    if (c == char_list[i]) return true;
-  }
+  if (c < 97  || c > 122) return true;
   return false;
 }
 
@@ -189,6 +187,15 @@ string read_file(string file_path) {
   return s;
 }
 
+void write_results(string str, string file_name) {
+  ofstream file;
+  mkdir("results", 0777);
+  file.open("results/" + file_name);
+  file << str;
+  file.close();
+  return;
+}
+
 pair<string, string> break_cipher(string file_path) {
   string wrd = read_file(file_path);
   auto ret_filter = filter(wrd);
@@ -212,17 +219,15 @@ pair<string, string> break_cipher(string file_path) {
 
 int main () {
   string wrd, key;
-  cout << "Palavra a ser cifrada: ";
-  cin >> wrd;
-  cout << "Chave de cifra: ";
-  cin >> key;
-  string cifrada = code(wrd, key);
-  cout << "Cifrada: " << cifrada << endl;
-  string decifrada = decode(cifrada, key);
-  cout << "Decifrada: " << decifrada << endl;
 
   auto res = break_cipher("cifras/desafio1.txt");
   cout << res.first << endl << endl << res.second;
+
+  auto res2 = break_cipher("cifras/desafio2.txt");
+  cout << res2.first << endl << endl << res2.second;
+
+  write_results(res.first, "desafio1.txt");
+  write_results(res2.first, "desafio2.txt");
 
   return 0;
 }
