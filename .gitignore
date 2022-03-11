@@ -1,6 +1,8 @@
 #misc
 .vscode
-results
+results*
+code*
+decode*
 
 #cpp
  Prerequisites
